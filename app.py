@@ -9,15 +9,18 @@ from linebot.exceptions import (
     InvalidSignatureError
 )
 from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage,
+    MessageEvent, TextMessage, TextSendMessage, StickerSendMessage
 )
 
 app = Flask(__name__)
 
-line_bot_api = LineBotApi('J4rXFm5uP+P2QqwsiT8M36LEfEALMTON+23qmvjvVwn5eTqmB94b63BQ14Nj3tlw97LskfvrcbFO6e12/H9M6uSHJKTkHA24Ttyr9mmB3b/nR35nD+ZKfQ1iITgUDPNyNRgMG2qyFqgUqLvjm1o7zQdB04t89/1O/w1cDnyilFU=')
+line_bot_api = LineBotApi(
+    'J4rXFm5uP+P2QqwsiT8M36LEfEALMTON+23qmvjvVwn5eTqmB94b63BQ14Nj3tlw97LskfvrcbFO6e12/H9M6uSHJKTkHA24Ttyr9mmB3b/nR35nD+ZKfQ1iITgUDPNyNRgMG2qyFqgUqLvjm1o7zQdB04t89/1O/w1cDnyilFU=')
 handler = WebhookHandler('87bd0639ead3aacae83a579054178553')
 
 # route 路徑: 如果有人去跑網址/callback，就會觸發執行以下 function
+
+
 @app.route("/callback", methods=['POST'])
 def callback():
     # get X-Line-Signature header value
@@ -37,11 +40,35 @@ def callback():
     return 'OK'
 
 # 再觸發這個，執行 handler 來處理訊息
+
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    msg = event.message.text
+    r = '我看不懂你要說什麼~'
+
+    if '給我貼圖' in msg:
+        sticker_message = StickerSendMessage(
+            package_id='1',
+            sticker_id='1'
+        )
+        line_bot_api.reply_message(
+            event.reply_token,
+            sticker_message)
+        return
+
+    if msg == ['hi', 'Hi']:
+        r = '嗨你好'
+    elif msg == '你吃飯了嗎?':
+        r = '還沒，我好餓！'
+    elif msg == '你是誰':
+        r = '我是機器人'
+
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=event.message.text))
+        TextSendMessage(text=r)
+    )
+
 
 # 直接執行這個檔案的時候才會執行裡面的內容
 # 如果不加，在載入時(import)，就會執行這個程式 -> 不好
